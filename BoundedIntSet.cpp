@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <algorithm>
 #include <chrono>
+#include <vector>
 
 const unsigned PRIME = 3;
 
@@ -18,34 +19,34 @@ public:
     struct Set_Elem
     {
         unsigned data;
-        bool free;
         struct Set_Elem* next;
     };
     unsigned MAXSIZE;
     struct Set_Elem* set_ptr;
     unsigned set_size;
     struct Set_Elem* buf_ptr;
+    const unsigned mask = 0x80000000;
     BoundedIntSet(unsigned maxsize)
     {
         this->MAXSIZE = maxsize;
-        set_ptr = (struct Set_Elem*)malloc((MAXSIZE - 1 + PRIME) * sizeof(Set_Elem));
+        set_ptr = (struct Set_Elem*)malloc((MAXSIZE + PRIME - 1) * sizeof(Set_Elem));
         buf_ptr = set_ptr + PRIME;
         set_size = 0;
         for (auto i = 0; i < (MAXSIZE - 1 + PRIME); i++)
         {
-            set_ptr[i].free = 0;
+            set_ptr[i].data = 0;
             set_ptr[i].next = NULL;
         }
     }
     BoundedIntSet(unsigned maxsize, unsigned single_element)
     {
         this->MAXSIZE = maxsize;
-        set_ptr = (struct Set_Elem*)malloc((MAXSIZE - 1 + PRIME) * sizeof(Set_Elem));
+        set_ptr = (struct Set_Elem*)malloc((MAXSIZE + PRIME - 1) * sizeof(Set_Elem));
         buf_ptr = set_ptr + PRIME;
         set_size = 0;
         for (auto i = 0; i < (MAXSIZE - 1 + PRIME); i++)
         {
-            set_ptr[i].free = 0;
+            set_ptr[i].data  = 0;
             set_ptr[i].next = NULL;
         }
         this->Add(single_element);
@@ -56,16 +57,16 @@ public:
         for (auto i = 0; i < PRIME; i++)
         {
             head = (set->set_ptr) + i;
-            if (head->free)
+            if (head->data >> 31)
             {
-                if (!this->Find(head->data))
+                if (!this->Find(head->data ^ mask))
                 {
-                    this->Add(head->data);
+                    this->Add(head->data ^ mask);
                 }
                 while (head->next != NULL)
                 {
                     head = head->next;
-                    if (!this->Find(head->data)) this->Add(head->data);
+                    if (!this->Find(head->data ^ mask)) this->Add(head->data ^ mask);
                 }
 
             }
@@ -79,18 +80,18 @@ public:
         for (auto i = 0; i < PRIME; i++)
         {
             head = (second_set->set_ptr) + i;
-            if (head->free)
+            if (head->data >> 31)
             {
-                if (!this->Find(head->data)) cnt++;
+                if (!this->Find(head->data ^ mask)) cnt++;
                 while (head->next != NULL)
                 {
                     head = head->next;
-                    if (!this->Find(head->data)) cnt++;
+                    if (!this->Find((head->data ^ mask))) cnt++;
                 }
 
             }
         }
-        if (cnt <= MAXSIZE) return true;
+        if ((cnt <= MAXSIZE)&&(cnt != this->set_size)) return true;
         else return false;
     }
     unsigned Add(unsigned new_element)
@@ -98,14 +99,13 @@ public:
         if (this->set_size == MAXSIZE) return 0;
         unsigned index = Hash_fun(new_element) % PRIME;
         struct Set_Elem* head = (this->set_ptr) + index;
-        if (head->free == 0)
+        if ((head->data >> 31) == 0)
         {
-            head->free = 1;
-            head->data = new_element;
+            head->data = new_element + mask;
             this->set_size++;
             return 1;
         }
-        else if (head->data == new_element)
+        else if ((head->data ^ mask) == new_element)
         {
             return 0;
         }
@@ -113,15 +113,14 @@ public:
         {
             while (head->next != NULL)
             {
-                if (head->data == new_element) break;
+                if ((head->data ^ mask) == new_element) break;
                 head = head->next;
             }
-            if (head->data != new_element)
+            if ((head->data ^ mask) != new_element)
             {
                 head->next = buf_ptr;
                 head = head->next;
-                head->data = new_element;
-                head->free = 1;
+                head->data = new_element + mask;
                 buf_ptr += 1;
                 this->set_size++;
                 return 1;
@@ -135,13 +134,13 @@ public:
         for (auto i = 0; i < PRIME; i++)
         {
             struct Set_Elem* head = (this->set_ptr) + i;
-            if (head->free)
+            if (head->data >> 31)
             {
-                std::cout << head->data << ' ';
+                std::cout << (head->data ^ mask) << ' ';
                 while (head->next != NULL)
                 {
                     head = head->next;
-                    std::cout << head->data << ' ';
+                    std::cout << (head->data ^ mask) << ' ';
                 }
 
             }
@@ -151,8 +150,8 @@ public:
     bool Find(unsigned num)
     {
         struct Set_Elem* head = this->set_ptr + Hash_fun(num) % PRIME;
-        while ((head->data != num) && (head->next != NULL)) head = head->next;
-        if (head->data == num) return true;
+        while (((head->data ^ mask) != num) && (head->next != NULL)) head = head->next;
+        if ((head->data ^ mask) == num) return true;
         else return false;
 
     }
@@ -167,9 +166,9 @@ int main()
 {
     srand(time(0));
 
-    const unsigned amount = 20000;
+    const unsigned amount = 1000;
     const unsigned cycles = 10000;
-    const unsigned k = 8;
+    const unsigned k = 4;
 
 
 
@@ -183,28 +182,22 @@ int main()
         arr2[i] = new std::unordered_set<unsigned>{ r };
     }
 
-   
 
     auto sum1 = 0;
     auto sum2 = 0;
-
+    auto len = 0;
     for (auto i = 0; i < cycles; i++)
     {
         unsigned i1 = rand() % amount;
         unsigned i2 = rand() % amount;
+        auto start_time = std::chrono::steady_clock::now();
         if (arr[i1]->UnionCheck(arr[i2])) {
-            auto start_time = std::chrono::steady_clock::now();
-            arr[i1]->Unite(arr[i2]);
             auto end_time = std::chrono::steady_clock::now();
             auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time);
-            sum1 += elapsed_ns.count();
-            std::cout << elapsed_ns.count() << " ns ";
-            start_time = std::chrono::steady_clock::now();
-            arr2[i1]->insert(arr2[i2]->begin(), arr2[i2]->end());
-            end_time = std::chrono::steady_clock::now();
-            elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time);
-            std::cout << elapsed_ns.count() << " ns\n";
-            sum2 += elapsed_ns.count();
+            std::cout << elapsed_ns.count() << " ns \n";
+            arr[i1]->Unite(arr[i2]);
+            
+            arr2[i1]->merge(*arr2[i2]);
         }
     }
 
@@ -214,5 +207,5 @@ int main()
     std::cout << sum1 << " ns\n";
     std::cout << sum2 << " ns\n";
 
-
+    return 0;
 }
