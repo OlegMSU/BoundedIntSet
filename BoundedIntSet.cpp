@@ -166,8 +166,8 @@ int main()
 {
     srand(time(0));
 
-    const unsigned amount = 100;
-    const unsigned cycles = 100;
+    const unsigned amount = 10000;
+    const unsigned cycles = 10000;
     const unsigned k = 20;
 
 
@@ -190,14 +190,23 @@ int main()
     {
         unsigned i1 = rand() % amount;
         unsigned i2 = rand() % amount;
+        auto start_time = std::chrono::steady_clock::now();
         if (arr[i1]->UnionCheck(arr[i2])) {
-            
-            auto start_time = std::chrono::steady_clock::now();
-            arr[i1]->Unite(arr[i2]);
             auto end_time = std::chrono::steady_clock::now();
             auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time);
-            std::cout << elapsed_ns.count() << " ns \n";
+            std::cout << elapsed_ns.count() << " ns ";
+            start_time = std::chrono::steady_clock::now();
+            arr[i1]->Unite(arr[i2]);
+            end_time = std::chrono::steady_clock::now();
+            elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time);
+            sum1 += elapsed_ns.count();
+            std::cout << elapsed_ns.count() << " ns ";
+            start_time = std::chrono::steady_clock::now();
             arr2[i1]->merge(*arr2[i2]);
+            end_time = std::chrono::steady_clock::now();
+            elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time);
+            sum2 += elapsed_ns.count();
+            std::cout << elapsed_ns.count() << " ns \n";
         }
     }
 
