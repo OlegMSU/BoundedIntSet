@@ -144,8 +144,8 @@ int main()
 {
     srand(time(0));
 
-    const unsigned amount = 100;
-    const unsigned cycles = 100;
+    const unsigned amount = 10000;
+    const unsigned cycles = 10000;
     const unsigned k = 20;
 
 
