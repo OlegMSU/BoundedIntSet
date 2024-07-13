@@ -24,7 +24,7 @@ public:
         max_size = maxsize;
         size = 0;
         set_ptr = (unsigned*)malloc(maxsize * sizeof(unsigned));
-        this->Add(single_element);
+        this->Add(single_element, 1);
     }
     void Unite(BoundedIntSet* second_set)
     {
@@ -44,13 +44,13 @@ public:
                     i++;
                 }
                 else {
-                    this->Add(second_set->set_ptr[j]);
+                    this->Add(second_set->set_ptr[j], 1);
                     j++;
                 }
             }
         }
         while (j < m) {
-            this->Add(second_set->set_ptr[j]);
+            this->Add(second_set->set_ptr[j], 1);
             j++;
         }
     }
@@ -91,9 +91,9 @@ public:
         if ((cnt <= this->max_size)&&(cnt > this->size)) return true;
         else return false;
     }
-    bool Add(unsigned new_element)
+    bool Add(unsigned new_element, bool checked)
     {
-        if ((this->size + 1 <= this->max_size)&&(this->Find(new_element) == this->max_size))
+        if ((this->size + 1 <= this->max_size)&&(checked || (this->Find(new_element) == this->max_size)))
         {
             unsigned i = 0;
             while ((this->set_ptr[i] < new_element) && (i < this->size)) i++;
