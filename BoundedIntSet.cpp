@@ -46,7 +46,7 @@ public:
         set_size = 0;
         for (auto i = 0; i < (MAXSIZE - 1 + PRIME); i++)
         {
-            set_ptr[i].data  = 0;
+            set_ptr[i].data = 0;
             set_ptr[i].next = NULL;
         }
         this->Add(single_element);
@@ -91,7 +91,7 @@ public:
 
             }
         }
-        if ((cnt <= MAXSIZE)&&(cnt != this->set_size)) return true;
+        if ((cnt <= MAXSIZE) && (cnt != this->set_size)) return true;
         else return false;
     }
     unsigned Add(unsigned new_element)
@@ -166,9 +166,9 @@ int main()
 {
     srand(time(0));
 
-    const unsigned amount = 1000;
-    const unsigned cycles = 10000;
-    const unsigned k = 4;
+    const unsigned amount = 100;
+    const unsigned cycles = 100;
+    const unsigned k = 20;
 
 
 
@@ -190,19 +190,19 @@ int main()
     {
         unsigned i1 = rand() % amount;
         unsigned i2 = rand() % amount;
-        auto start_time = std::chrono::steady_clock::now();
         if (arr[i1]->UnionCheck(arr[i2])) {
+            
+            auto start_time = std::chrono::steady_clock::now();
+            arr[i1]->Unite(arr[i2]);
             auto end_time = std::chrono::steady_clock::now();
             auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time);
             std::cout << elapsed_ns.count() << " ns \n";
-            arr[i1]->Unite(arr[i2]);
-            
             arr2[i1]->merge(*arr2[i2]);
         }
     }
 
 
-   
+
 
     std::cout << sum1 << " ns\n";
     std::cout << sum2 << " ns\n";
