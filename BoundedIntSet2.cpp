@@ -1,15 +1,13 @@
-#include <iostream>
-#include <unordered_set>
-#include <string>
-#include <stdlib.h>
-#include <algorithm>
 #include <chrono>
-#include <vector>
+#include <iostream>
+#include <memory>
+#include <unordered_set>
 
 
 class BoundedIntSet
 {
 public:
+    std::allocator<unsigned> SetAllocator;
     unsigned max_size;
     unsigned* set_ptr;
     unsigned size;
@@ -17,13 +15,13 @@ public:
     {
         max_size = maxsize;
         size = 0;
-        set_ptr = (unsigned*)malloc(maxsize * sizeof(unsigned));
+        set_ptr = SetAllocator.allocate(maxsize);
     }
     BoundedIntSet(unsigned maxsize, unsigned single_element)
     {
         max_size = maxsize;
         size = 0;
-        set_ptr = (unsigned*)malloc(maxsize * sizeof(unsigned));
+        set_ptr = SetAllocator.allocate(maxsize);
         this->Add(single_element, 1);
     }
     void Unite(BoundedIntSet* second_set)
@@ -135,10 +133,9 @@ public:
     }
     ~BoundedIntSet()
     {
-        if (set_ptr != NULL) free(set_ptr);
+        SetAllocator.deallocate(set_ptr, max_size);
     }
 };
-
 
 int main()
 {
