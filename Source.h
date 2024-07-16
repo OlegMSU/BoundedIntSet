@@ -1,9 +1,12 @@
+#ifndef BOUNDEDINTSET
+#define BOUNDEDINTSET
+
 #include <memory>
 #include <iostream>
 
 #pragma once
 
-template <typename NumType = unsigned, typename SizeType = unsigned, class Allocator = std::allocator<unsigned>>
+template <class NumType = unsigned, class SizeType = unsigned, class Allocator = std::allocator<unsigned>>
 class BoundedIntSet
 {
 public:
@@ -20,3 +23,8 @@ public:
     SizeType Find(NumType num);
     ~BoundedIntSet();
 };
+
+#define BOUNDEDINTSET_FUNCTIONS
+#include "Source.cpp"
+
+#endif
