@@ -1,8 +1,11 @@
+#ifndef BOUNDEDINTSET_FUNCTIONS
+#include "Source.h"
 #include <memory>
 #include <iostream>
-#include "Source.h"
 
-template <typename NumType, typename SizeType, class Allocator>
+
+
+template <class NumType, class SizeType, class Allocator>
 BoundedIntSet<NumType, SizeType, Allocator>::BoundedIntSet(SizeType maxsize)
 {
 	max_size = maxsize;
@@ -10,7 +13,7 @@ BoundedIntSet<NumType, SizeType, Allocator>::BoundedIntSet(SizeType maxsize)
 	set_ptr = SetAllocator.allocate(maxsize);
 }
 
-template <typename NumType, typename SizeType, class Allocator>
+template <class NumType, class SizeType, class Allocator>
 BoundedIntSet<NumType, SizeType, Allocator>::BoundedIntSet(SizeType maxsize, NumType single_element)
 {
 	max_size = maxsize;
@@ -19,7 +22,7 @@ BoundedIntSet<NumType, SizeType, Allocator>::BoundedIntSet(SizeType maxsize, Num
 	this->Add(single_element, 1);
 }
 
-template <typename NumType, typename SizeType, class Allocator>
+template <class NumType, class SizeType, class Allocator>
 void BoundedIntSet<NumType, SizeType, Allocator>::Unite(BoundedIntSet<NumType, SizeType, Allocator>* second_set)
 {
 	SizeType index = 0;
@@ -49,7 +52,7 @@ void BoundedIntSet<NumType, SizeType, Allocator>::Unite(BoundedIntSet<NumType, S
 	}
 }
 
-template <typename NumType, typename SizeType, class Allocator>
+template <class NumType, class SizeType, class Allocator>
 bool BoundedIntSet<NumType, SizeType, Allocator>::UnionCheck(BoundedIntSet<NumType, SizeType, Allocator>* second_set)
 {
 
@@ -88,7 +91,7 @@ bool BoundedIntSet<NumType, SizeType, Allocator>::UnionCheck(BoundedIntSet<NumTy
 	else return false;
 }
 
-template <typename NumType, typename SizeType, class Allocator>
+template <class NumType, class SizeType, class Allocator>
 bool BoundedIntSet<NumType, SizeType, Allocator>::Add(NumType new_element, bool checked)
 {
 	if ((this->size + 1 <= this->max_size) && (checked || (this->Find(new_element) == this->max_size)))
@@ -107,7 +110,7 @@ bool BoundedIntSet<NumType, SizeType, Allocator>::Add(NumType new_element, bool 
 	else return false;
 }
 
-template <typename NumType, typename SizeType, class Allocator>
+template <class NumType, class SizeType, class Allocator>
 void BoundedIntSet<NumType, SizeType, Allocator>::Print()
 {
 	for (auto i = 0; i < size; i++)
@@ -117,7 +120,7 @@ void BoundedIntSet<NumType, SizeType, Allocator>::Print()
 	std::cout << '\n';
 }
 
-template <typename NumType, typename SizeType, class Allocator>
+template <class NumType, class SizeType, class Allocator>
 SizeType BoundedIntSet<NumType, SizeType, Allocator>::Find(NumType num)
 {
 	if (this->size == 0) return this->max_size;
@@ -135,25 +138,10 @@ SizeType BoundedIntSet<NumType, SizeType, Allocator>::Find(NumType num)
 	else return this->max_size;
 }
 
-template <typename NumType, typename SizeType, class Allocator>
+template <class NumType, class SizeType, class Allocator>
 BoundedIntSet<NumType, SizeType, Allocator>::~BoundedIntSet()
 {
 	SetAllocator.deallocate(set_ptr, max_size);
 }
 
-template
-BoundedIntSet<unsigned, unsigned, std::allocator<unsigned>>::BoundedIntSet(unsigned maxsize, unsigned single_element);
-template
-BoundedIntSet<unsigned long long, unsigned, std::allocator<unsigned long long>>::BoundedIntSet(unsigned maxsize, unsigned long long single_element);
-template
-BoundedIntSet<unsigned, unsigned, std::allocator<unsigned>>::BoundedIntSet(unsigned maxsize);
-template
-BoundedIntSet<unsigned long long, unsigned, std::allocator<unsigned long long>>::BoundedIntSet(unsigned maxsize);
-template
-void BoundedIntSet<unsigned, unsigned, std::allocator<unsigned>>::Unite(BoundedIntSet<unsigned, unsigned, std::allocator<unsigned>>* second_set);
-template
-void BoundedIntSet<unsigned long long, unsigned, std::allocator<unsigned long long>>::Unite(BoundedIntSet<unsigned long long, unsigned, std::allocator<unsigned long long>>* second_set);
-template
-bool BoundedIntSet<unsigned, unsigned, std::allocator<unsigned>>::UnionCheck(BoundedIntSet<unsigned, unsigned, std::allocator<unsigned>>* second_set);
-template
-bool BoundedIntSet<unsigned long long, unsigned, std::allocator<unsigned long long>>::UnionCheck(BoundedIntSet<unsigned long long, unsigned, std::allocator<unsigned long long>>* second_set);
+#endif
